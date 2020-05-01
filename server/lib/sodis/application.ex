@@ -9,6 +9,7 @@ defmodule Sodis.Application do
     children = [
       # Starts a worker by calling: Sodis.Worker.start_link(arg)
       # {Sodis.Worker, arg}
+      Sodis.Endpoint
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
