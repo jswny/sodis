@@ -19,6 +19,8 @@ defmodule Sodis.Router do
   post "/get-score" do
     params = conn.body_params
 
+    IO.inspect("Got /get-score request with params: #{params}")
+
     device_id = params["device_id"]
     device_data = :ets.lookup(@ets_table, device_id)
 
@@ -62,6 +64,8 @@ defmodule Sodis.Router do
   post "/get-num-locations" do
     params = conn.body_params
 
+    IO.inspect("Got /get-num-locations request with params: #{params}")
+
     device_id = params["device_id"]
     device_data = :ets.lookup(@ets_table, device_id)
 
@@ -89,6 +93,8 @@ defmodule Sodis.Router do
 
   post "/add-data" do
     params = conn.body_params
+
+    IO.inspect("Got /add-data request with params: #{params}")
 
     device_id = params["device_id"]
     device_data = :ets.lookup(@ets_table, device_id)
