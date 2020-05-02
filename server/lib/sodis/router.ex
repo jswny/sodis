@@ -59,8 +59,32 @@ defmodule Sodis.Router do
     |> send_resp(200, Poison.encode!(%{score: score}))
   end
 
+  post "/get-num-locations" do
+    params = conn.body_params
+
+    device_id = params["device_id"]
+    device_data = :ets.lookup(@ets_table, device_id)
+
+    if device_data == [] do
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(200, Poison.encode!(%{num_locations: "N/A"}))
+    end
+
+    device_data =
+      device_data
+      |> Enum.at(0)
+      |> elem(1)
+
+    num_locations = Enum.count(device_data)
+
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(200, Poison.encode!(%{num_locations: num_locations}))
+  end
+
   defp total_count(device_counts) do
-    Enum.reduce(device_counts, 0, fn {device_id, count}, acc -> acc + count end)
+    Enum.reduce(device_counts, 0, fn {_device_id, count}, acc -> acc + count end)
   end
 
   post "/add-data" do
