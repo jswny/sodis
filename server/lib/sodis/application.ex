@@ -6,6 +6,8 @@ defmodule Sodis.Application do
   use Application
 
   def start(_type, _args) do
+    :ets.new(:place_data, [:set, :public, :named_table])
+
     children = [
       # Starts a worker by calling: Sodis.Worker.start_link(arg)
       # {Sodis.Worker, arg}
