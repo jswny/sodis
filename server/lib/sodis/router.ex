@@ -16,6 +16,53 @@ defmodule Sodis.Router do
     |> send_resp(200, Poison.encode!(message))
   end
 
+  post "/get-score" do
+    params = conn.body_params
+
+    device_id = params["device_id"]
+    device_data = :ets.lookup(@ets_table, device_id)
+
+    if device_data == [] do
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(200, Poison.encode!(%{score: "N/A"}))
+    end
+
+    device_data =
+      device_data
+      |> Enum.at(0)
+      |> elem(1)
+
+    all_device_counts =
+      device_data
+        |> Enum.reduce(%{}, fn {_location_id, bluetooth_ids}, acc ->
+        bluetooth_ids
+        |> Enum.reduce(%{}, fn id, acc2 ->
+          count = Map.get(acc, id, 0)
+          Map.put(acc2, id, count + 1)
+        end)
+      end)
+      |> Enum.sort(&(elem(&1, 1) >= elem(&2, 1)))
+
+    total_count = total_count(all_device_counts)
+
+    num_common_devices = floor(Enum.count(all_device_counts) / 2)
+
+    common_devices_removed = Enum.drop(all_device_counts, num_common_devices)
+
+    common_devices_removed_count = total_count(common_devices_removed)
+
+    score = 1 - (common_devices_removed_count / total_count)
+
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(200, Poison.encode!(%{score: score}))
+  end
+
+  defp total_count(device_counts) do
+    Enum.reduce(device_counts, 0, fn {device_id, count}, acc -> acc + count end)
+  end
+
   post "/add-data" do
     params = conn.body_params
 
