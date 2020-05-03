@@ -290,7 +290,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                             e.printStackTrace();
                         }
                         Log.d("VOLLEY", score);
-                        scoreText.setText(score);
+                        scoreText.setText("Score: " + score);
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -309,6 +309,51 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
         queue.add(jsonObjectRequest);
 
+    }
+
+    public void handleLocationsButtonClick(View view) {
+        final TextView locationsText = (TextView) findViewById(R.id.locations_text);
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url ="http://192.168.86.22:4000/get-num-locations";
+
+        JSONObject jsonBody = new JSONObject();
+
+        try {
+            jsonBody.put("device_id", getDeviceId());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(url, jsonBody,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        String locations = null;
+                        try {
+                            locations = response.get("num_locations").toString();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Log.d("VOLLEY", locations);
+                        locationsText.setText("# Locations: " + locations);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("VOLLEY", error.getMessage(), error);
+                locationsText.setText("Error!");
+            }
+        }) { //no semicolon or coma
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Content-Type", "application/json");
+                return params;
+            }
+        };
+
+        queue.add(jsonObjectRequest);
     }
 
     private String getDeviceId() {
