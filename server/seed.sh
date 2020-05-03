@@ -8,6 +8,10 @@ curl --header "Content-Type: application/json" --request POST --data '{"device_i
 
 curl --header "Content-Type: application/json" --request POST --data '{"device_id": "f0c8d23b5e9789b9", "location_id": "loc3", "bluetooth_ids": [1, 2, 3]}' http://localhost:4000/add-data
 
+curl --header "Content-Type: application/json" --request POST --data '{"device_id": "f0c8d23b5e9789b9", "location_id": "loc4", "bluetooth_ids": []}' http://localhost:4000/add-data
+
+curl --header "Content-Type: application/json" --request POST --data '{"device_id": "f0c8d23b5e9789b9", "location_id": "loc5", "bluetooth_ids": []}' http://localhost:4000/add-data
+
 echo ""
 
 curl --header "Content-Type: application/json" --request POST --data '{"device_id": "f0c8d23b5e9789b9"}' http://localhost:4000/get-score

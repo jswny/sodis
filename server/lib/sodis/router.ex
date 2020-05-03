@@ -38,12 +38,13 @@ defmodule Sodis.Router do
 
       all_device_counts =
         device_data
+          |> Enum.filter(fn {_location_id, bluetooth_ids} -> MapSet.size(bluetooth_ids) != 0 end)
           |> Enum.reduce(%{}, fn {_location_id, bluetooth_ids}, acc ->
-          bluetooth_ids
-          |> Enum.reduce(%{}, fn id, acc2 ->
-            count = Map.get(acc, id, 0)
-            Map.put(acc2, id, count + 1)
-          end)
+            bluetooth_ids
+            |> Enum.reduce(%{}, fn id, acc2 ->
+              count = Map.get(acc, id, 0)
+              Map.put(acc2, id, count + 1)
+            end)
         end)
         |> Enum.sort(&(elem(&1, 1) >= elem(&2, 1)))
 
@@ -55,7 +56,13 @@ defmodule Sodis.Router do
 
       common_devices_removed_count = total_count(common_devices_removed)
 
-      score = 1 - (common_devices_removed_count / total_count)
+      IO.inspect("#{common_devices_removed_count}, #{total_count}")
+      score =
+        if total_count == 0 do
+          "N/A"
+        else
+          1 - (common_devices_removed_count / total_count)
+        end
 
       conn
       |> put_resp_content_type("application/json")

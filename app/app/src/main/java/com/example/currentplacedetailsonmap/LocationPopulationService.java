@@ -130,6 +130,9 @@ public class LocationPopulationService extends IntentService {
     }
 
     private void sendRequest() {
+        if (location == null) {
+            return;
+        }
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = server + "/add-data";
 
