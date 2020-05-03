@@ -29,37 +29,38 @@ defmodule Sodis.Router do
       conn
       |> put_resp_content_type("application/json")
       |> send_resp(200, Poison.encode!(%{score: "N/A"}))
-    end
+    else
+      device_data =
+        device_data
+        |> IO.inspect()
+        |> Enum.at(0)
+        |> elem(1)
 
-    device_data =
-      device_data
-      |> Enum.at(0)
-      |> elem(1)
-
-    all_device_counts =
-      device_data
-        |> Enum.reduce(%{}, fn {_location_id, bluetooth_ids}, acc ->
-        bluetooth_ids
-        |> Enum.reduce(%{}, fn id, acc2 ->
-          count = Map.get(acc, id, 0)
-          Map.put(acc2, id, count + 1)
+      all_device_counts =
+        device_data
+          |> Enum.reduce(%{}, fn {_location_id, bluetooth_ids}, acc ->
+          bluetooth_ids
+          |> Enum.reduce(%{}, fn id, acc2 ->
+            count = Map.get(acc, id, 0)
+            Map.put(acc2, id, count + 1)
+          end)
         end)
-      end)
-      |> Enum.sort(&(elem(&1, 1) >= elem(&2, 1)))
+        |> Enum.sort(&(elem(&1, 1) >= elem(&2, 1)))
 
-    total_count = total_count(all_device_counts)
+      total_count = total_count(all_device_counts)
 
-    num_common_devices = floor(Enum.count(all_device_counts) / 2)
+      num_common_devices = floor(Enum.count(all_device_counts) / 2)
 
-    common_devices_removed = Enum.drop(all_device_counts, num_common_devices)
+      common_devices_removed = Enum.drop(all_device_counts, num_common_devices)
 
-    common_devices_removed_count = total_count(common_devices_removed)
+      common_devices_removed_count = total_count(common_devices_removed)
 
-    score = 1 - (common_devices_removed_count / total_count)
+      score = 1 - (common_devices_removed_count / total_count)
 
-    conn
-    |> put_resp_content_type("application/json")
-    |> send_resp(200, Poison.encode!(%{score: score}))
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(200, Poison.encode!(%{score: score}))
+    end
   end
 
   post "/get-num-locations" do
@@ -75,18 +76,18 @@ defmodule Sodis.Router do
       conn
       |> put_resp_content_type("application/json")
       |> send_resp(200, Poison.encode!(%{num_locations: "N/A"}))
+    else
+      device_data =
+        device_data
+        |> Enum.at(0)
+        |> elem(1)
+
+      num_locations = Enum.count(device_data)
+
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(200, Poison.encode!(%{num_locations: num_locations}))
     end
-
-    device_data =
-      device_data
-      |> Enum.at(0)
-      |> elem(1)
-
-    num_locations = Enum.count(device_data)
-
-    conn
-    |> put_resp_content_type("application/json")
-    |> send_resp(200, Poison.encode!(%{num_locations: num_locations}))
   end
 
   defp total_count(device_counts) do
@@ -140,7 +141,7 @@ defmodule Sodis.Router do
 
     conn
     |> put_resp_content_type("text/plain")
-    |> send_resp(200, "#{result}")
+    |> send_resp(200, Poison.encode!(%{result: result}))
   end
 
   match _ do

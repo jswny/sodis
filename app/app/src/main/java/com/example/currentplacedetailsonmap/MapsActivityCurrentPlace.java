@@ -1,12 +1,14 @@
 package com.example.currentplacedetailsonmap;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +22,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -40,8 +50,15 @@ import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.telephony.TelephonyManager;
+
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An activity that displays a map showing the place at the device's current location.
@@ -248,6 +265,56 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         getDeviceLocation();
     }
 
+    public void handleScoreButtonClick(View view) {
+        final TextView scoreText = (TextView) findViewById(R.id.score_text);
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url ="http://192.168.86.22:4000/get-score";
+
+        JSONObject jsonBody = new JSONObject();
+
+        try {
+            jsonBody.put("device_id", getDeviceId());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(url, jsonBody,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        String score = null;
+                        try {
+                            score = response.get("score").toString();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Log.d("VOLLEY", score);
+                        scoreText.setText(score);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("VOLLEY", error.getMessage(), error);
+                scoreText.setText("Error!");
+            }
+        }) { //no semicolon or coma
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Content-Type", "application/json");
+                return params;
+            }
+        };
+
+        queue.add(jsonObjectRequest);
+
+    }
+
+    private String getDeviceId() {
+        String androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        return androidId;
+    }
 
     /**
      * Gets the current location of the device, and positions the map's camera.
