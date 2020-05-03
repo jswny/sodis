@@ -5,7 +5,7 @@ A social distancing app built to show you how well you are social distancing.
 There are two components to Sodis, a client app for Android and a Server. The client app is located in `app/` and the server is located in `server/`.
 
 ## Installation
-To install the app, simply open it up in Android Studio and install it to the appropriate device using the "run" button.
+To install the app, simply open it up in Android Studio and install it to the appropriate device using the "run" button. Make sure to set your Google Maps API key in `gradle.properties`, and your local server IP in `MapsActivityCurrentPlace.java`.
 
 To install the server, do the following steps in order:
 1. Install the [Elixir Lanugage](https://elixir-lang.org/getting-started/introduction.html)
