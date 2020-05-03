@@ -1,6 +1,8 @@
 package com.example.currentplacedetailsonmap;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -53,9 +55,8 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.telephony.TelephonyManager;
-
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,6 +116,8 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     private int btDevicesCount;
     ////////////////////////////////////////////////////////////////////////////////
 
+    public static String server = "http://192.168.86.22:4000";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -139,6 +142,14 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        Intent ii = new Intent(getApplicationContext(), LocationPopulationService.class);
+        PendingIntent pii = PendingIntent.getService(getApplicationContext(), 2222, ii, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.SECOND, 5);
+        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+        am.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 60000, pii);
     }
 
     /**
@@ -269,7 +280,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         final TextView scoreText = (TextView) findViewById(R.id.score_text);
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="http://192.168.86.22:4000/get-score";
+        String url = server + "/get-score";
 
         JSONObject jsonBody = new JSONObject();
 
@@ -315,7 +326,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         final TextView locationsText = (TextView) findViewById(R.id.locations_text);
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="http://192.168.86.22:4000/get-num-locations";
+        String url = server + "/get-num-locations";
 
         JSONObject jsonBody = new JSONObject();
 
